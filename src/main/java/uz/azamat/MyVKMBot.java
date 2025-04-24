@@ -7,10 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -47,35 +45,15 @@ public class MyVKMBot extends TelegramLongPollingBot {
         if (text.equals("/start")) {
             consumer.accept(sendMessage(chatId, "Assalomu aleykum, hurmatli foydalanuvchi.\n Qo'shiq nomnini kiriting:"));
         } else if (!text.startsWith("/")) {
-            String allMusicsBySearchingString = getAllMusicsBySearchingString(text);
-            List<String> allMusicsBySearchingList = getAllMusicsBySearchingList(text);
-            InlineKeyboardMarkup inlineKeyboardMarkup = getInlineKeyboardMarkup(allMusicsBySearchingList);
+            List<List<String>> grouped = ButtonService.getMusicGroups(getAllMusicsBySearchingList(text));
+            List<String> musics = grouped.get(0);
+
+            InlineKeyboardMarkup inlineKeyboardMarkup = ButtonService.getInlineButtonsAfterSearched(text, 0);
+            String allMusicsBySearchingString = getAllMusicsBySearchingString(musics, text, 0);
             consumer.accept(sendMessage(chatId, allMusicsBySearchingString, inlineKeyboardMarkup));
         } else {
             consumer.accept(sendMessage(chatId, "Iltimos qo'shiq nomini kiriting: "));
         }
-    }
-
-    private static InlineKeyboardMarkup getInlineKeyboardMarkup(List<String> allMusicsBySearchingList) {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> allButtons = new ArrayList<>();
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        for (int i = 0; i < allMusicsBySearchingList.size(); i++) {
-            if (i % 5 == 0) {
-                allButtons.add(row);
-                row = new ArrayList<>();
-                InlineKeyboardButton button = new InlineKeyboardButton(i + 1 + "");
-                button.setCallbackData(i + "");
-                row.add(button);
-                continue;
-            }
-            InlineKeyboardButton button = new InlineKeyboardButton(i + 1 + "");
-            button.setCallbackData(i + "");
-            row.add(button);
-        }
-        allButtons.add(row);
-        inlineKeyboardMarkup.setKeyboard(allButtons);
-        return inlineKeyboardMarkup;
     }
 
     private static void runOnClickInlineButtons(Update update) {

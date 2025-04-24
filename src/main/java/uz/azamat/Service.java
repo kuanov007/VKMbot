@@ -19,14 +19,30 @@ public interface Service {
         return musicsBySearching;
     }
 
-    static String getAllMusicsBySearchingString(String query) {
+    static String getAllMusicsBySearchingString(String query, int page) {
         List<String> allMusicsBySearchingList = getAllMusicsBySearchingList(query);
         StringBuilder sb = new StringBuilder();
+
+        sb.append("Natija ( ").append(page).append(" - ").append(page + 10).append(" ) ")
+                .append("/").append(allMusicsBySearchingList.size()).append("\n");
         for (int i = 0; i < allMusicsBySearchingList.size(); i++) {
             sb.append(i + 1).append(") ").append(allMusicsBySearchingList.get(i)).append("\n");
         }
         return sb.toString();
     }
+
+    static String getAllMusicsBySearchingString(List<String> allMusicsBySearchingList, String query, int page) {
+        int size = getAllMusicsBySearchingList(query).size();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Natija ( ").append(page).append(" - ").append(page + allMusicsBySearchingList.size()).append(" ) ")
+                .append("/").append(size).append("\n");
+        for (int i = 0; i < allMusicsBySearchingList.size(); i++) {
+            sb.append(i + 1).append(") ").append(allMusicsBySearchingList.get(i)).append("\n");
+        }
+        return sb.toString();
+    }
+
 
     static SendMessage sendMessage(Long chatId, String text) {
         SendMessage sendMessage = new SendMessage();
