@@ -3,16 +3,14 @@ package uz.azamat;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethodMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.List;
 import java.util.function.Consumer;
 
-import static uz.azamat.Service.*;
 
 public class MyVKMBot extends TelegramLongPollingBot {
     private final String username;
@@ -25,7 +23,13 @@ public class MyVKMBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasCallbackQuery()) {
-            runOnClickInlineButtons(update);
+            runOnClickInlineButtons(update, editMessageText -> {
+                try {
+                    execute(editMessageText);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } else {
             runGetAnyMessageOrOnClickReplyButtons(update, botApiMethodMessage -> {
                 try {
@@ -42,24 +46,15 @@ public class MyVKMBot extends TelegramLongPollingBot {
         String text = message.getText();
         Long chatId = message.getChatId();
 
-        if (text.equals("/start")) {
-            consumer.accept(sendMessage(chatId, "Assalomu aleykum, hurmatli foydalanuvchi.\n Qo'shiq nomnini kiriting:"));
-        } else if (!text.startsWith("/")) {
-            List<List<String>> grouped = ButtonService.getMusicGroups(getAllMusicsBySearchingList(text));
-            List<String> musics = grouped.get(0);
 
-            InlineKeyboardMarkup inlineKeyboardMarkup = ButtonService.getInlineButtonsAfterSearched(text, 0);
-            String allMusicsBySearchingString = getAllMusicsBySearchingString(musics, text, 0);
-            consumer.accept(sendMessage(chatId, allMusicsBySearchingString, inlineKeyboardMarkup));
-        } else {
-            consumer.accept(sendMessage(chatId, "Iltimos qo'shiq nomini kiriting: "));
-        }
     }
 
-    private static void runOnClickInlineButtons(Update update) {
+    private static void runOnClickInlineButtons(Update update, Consumer<EditMessageText> consumer) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
+        System.out.println(messageId);
         Long chatId = callbackQuery.getMessage().getChatId();
-        String date = callbackQuery.getData();
+        String data = callbackQuery.getData();
 
 
     }
